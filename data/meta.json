@@ -1,0 +1,5 @@
+{
+ "series_group": "meta",
+ "built": "2026-09-07",
+ "note": "Output has no curated projection and no hand ritual. Everything on the page is fetched or computed. Two upstream facts are recorded rather than worked around: there is no free purchasing managers index (FRED NAPM returns 404, ISM withdrew redistribution), and ALFRED vintage history is keyed-only, so the 2022 vintage card is a degradable enhancement that states its gap when no key is present."
+}

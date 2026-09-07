@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is the Economy Producing? Output Since 1919, and the Two-Quarter Rule on Trial</title>
+<meta name="description" content="Industrial production is one of the series the NBER dating committee actually watches, so it confirms recessions rather than predicting them. A century of output downturns scored since 1919, and the two-quarter rule the public believes put on trial against the committee's own dates: it false-alarms, it misses 1960 and 2001, and it never leads.">
+<link rel="stylesheet" href="/shared-footer/footer.css">
+<style>
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;
+  --plane: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11,11,11,0.10);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #4a3aa7;
+  --tooltip-bg: rgba(252,252,251,0.97);
+  --warn: #b3541e;
+  --band-alpha: 0.09;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --plane: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #9085e9;
+    --tooltip-bg: rgba(26,26,25,0.97);
+    --warn: #e08a4f;
+    --band-alpha: 0.13;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --plane: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255,255,255,0.10);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #9085e9;
+  --tooltip-bg: rgba(26,26,25,0.97);
+  --warn: #e08a4f;
+  --band-alpha: 0.13;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--plane);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 8px; }
+
+header h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.02em; }
+header p.sub { margin: 0; color: var(--text-secondary); max-width: 68ch; }
+.chip {
+  display: inline-flex; align-items: baseline; gap: 8px; margin-top: 16px;
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface-1); font-size: 0.82rem; color: var(--text-secondary);
+}
+.chip[hidden] { display: none; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--series-3); flex: none; align-self: center; }
+.chip[data-state="signal"] .dot { background: var(--series-2); }
+.chip b { color: var(--text-primary); font-weight: 650; }
+.stamp { margin-top: 10px; font-size: 0.82rem; color: var(--muted); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 24px 0 8px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.tile .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.tile .value { font-size: 1.85rem; font-weight: 650; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tile .note { font-size: 0.8rem; color: var(--text-secondary); }
+
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px 14px; margin: 16px 0; }
+.card h2 { font-size: 1.05rem; margin: 0 0 2px; letter-spacing: -0.01em; }
+.card p.cap { margin: 0 0 12px; font-size: 0.85rem; color: var(--text-secondary); max-width: 90ch; }
+
+.duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 12px; }
+.group { display: flex; gap: 4px; flex-wrap: wrap; }
+.group .glabel { font-size: 0.78rem; color: var(--muted); align-self: center; margin-right: 4px; }
+button.seg {
+  font: inherit; font-size: 0.82rem; padding: 5px 11px; cursor: pointer;
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border); border-radius: 999px;
+}
+button.seg:hover { background: var(--grid); }
+button.seg[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-1); border-color: var(--text-primary); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 8px; font-size: 0.85rem; color: var(--text-secondary); }
+.legend span.item { display: flex; align-items: center; gap: 7px; }
+.legend .swatch { width: 14px; height: 3px; border-radius: 2px; }
+.legend .swatch.dashed { background: none !important; border-top: 3px dashed; width: 14px; height: 0; border-radius: 0; }
+.legend .swatch.band { width: 14px; height: 10px; border: 1px solid var(--border); }
+
+.plot { position: relative; width: 100%; }
+canvas { display: block; width: 100%; touch-action: pan-y; }
+.tooltip {
+  position: absolute; pointer-events: none; opacity: 0; transition: opacity .08s;
+  background: var(--tooltip-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 0.8rem; line-height: 1.45; white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.14); z-index: 5; color: var(--text-primary);
+}
+.tooltip .tdate { color: var(--muted); font-size: 0.74rem; margin-bottom: 3px; }
+.tooltip .trow { display: flex; align-items: center; gap: 7px; }
+.tooltip .tval { font-variant-numeric: tabular-nums; margin-left: auto; padding-left: 14px; font-weight: 600; }
+
+.status { color: var(--text-secondary); font-size: 0.9rem; padding: 40px 0; text-align: center; }
+
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 5px 8px; border-bottom: 1px solid var(--grid); }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+td .tag { color: var(--muted); font-size: 0.78rem; }
+tr.running td { background: rgba(235,104,52,0.06); }
+tr.miss td { background: rgba(179,84,30,0.07); }
+.verdict-bad { color: var(--warn); font-weight: 600; }
+.gapnote { font-size: 0.85rem; color: var(--warn); border: 1px dashed var(--warn); border-radius: 8px; padding: 10px 12px; margin: 6px 0 0; }
+.tablewrap { overflow-x: auto; }
+
+.prose { font-size: 0.92rem; color: var(--text-secondary); }
+.prose h3 { font-size: 0.95rem; color: var(--text-primary); margin: 18px 0 6px; }
+.prose ul { padding-left: 20px; margin: 6px 0; }
+.prose li { margin-bottom: 7px; }
+.prose a { color: var(--series-1); }
+.prose code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+/* A figure the data could not supply renders as a visible gap, never as a
+   silently vanished number. */
+[data-tok] { font-variant-numeric: tabular-nums; }
+.tok-missing { color: var(--warn); border-bottom: 1px dashed var(--warn); }
+
+/* The hub footer is styled by /shared-footer/footer.css, linked above and
+   served by Caddy's shared_footer snippet. Deliberately not restyled here. */
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Is the Economy Producing?</h1>
+    <p class="sub">A recession is not announced by a rule. It is decided by a committee reading a handful of monthly series, and industrial production is one of them. That makes output the thing a recession partly <em>is</em>, which means it cannot warn you: on this page's own numbers its crest arrives a median <span data-tok="dt_median_crest">…</span> months from the recession peak and its alarm arrives <span data-tok="dt_median_alarm_abs">…</span> months <em>after</em>. Beneath that sits the rule the public uses instead, two consecutive negative quarters, scored against the same committee. It false-alarms, it misses, and it has never once led. Nothing here is a forecast.</p>
+    <p class="chip" id="chip" hidden></p>
+    <p class="stamp" id="stamp">Loading data…</p>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <section class="card">
+    <h2>A century of output: industrial production since 1919</h2>
+    <p class="cap">The Federal Reserve's G.17 index, monthly since January 1919 and the deepest series on this site. Two world wars, the Depression, and every postwar cycle in one line. Blue shading is NBER recessions; the toggle adds the computed downturn episodes from the table below, so the chart and the table are the same object.</p>
+    <div class="controls">
+      <div class="group" role="group" aria-label="Overlays">
+        <span class="glabel">Overlay</span>
+        <button class="seg" data-toggle="downturns" aria-pressed="false">Computed downturns</button>
+        <button class="seg" data-toggle="log" aria-pressed="false">Log scale</button>
+      </div>
+    </div>
+    <div class="legend" id="legend-main"></div>
+    <div class="plot"><canvas id="c-main" height="380"></canvas><div class="tooltip" id="t-main"></div></div>
+    <p class="status" id="status">Fetching a century of production…</p>
+  </section>
+
+  <section class="card">
+    <h2>Every output downturn, scored</h2>
+    <p class="cap" id="rule-cap">Computed from the index on every refresh, never hand-maintained. <span data-tok="downturn_rule">…</span></p>
+    <div class="tablewrap"><table id="dt-tbl">
+      <thead><tr><th>Crest</th><th>Alarm fired</th><th>Bottom</th><th>Depth</th><th>Months</th><th>Recession began</th><th>Lead from crest</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div class="prose" style="margin:12px 0 0">
+      <p>The finding, computed: <span data-tok="dt_episodes">…</span> downturns in <span data-tok="dt_years">…</span> years, of which <span data-tok="dt_credited">…</span> attach to a recession and <span data-tok="dt_uncredited_n">…</span> recessions since 1919 go uncredited. That is a near-perfect hit rate, and it is not a compliment. Compare the leads: on the <a href="https://housing.chrislawrence.ca">housing</a> page the crest led by a median 20 months and on <a href="https://yield.chrislawrence.ca">yield</a> the first inverted month led by 12, while here the crest leads by <span data-tok="dt_median_crest">…</span> and the alarm trails by <span data-tok="dt_median_alarm_abs">…</span>. Output does not see the recession coming because output is what the recession is made of.</p>
+      <p>The single false alarm is worth its own sentence. <strong><span data-tok="dt_fp_years">…</span></strong> was a real industrial recession, driven by the collapse in oil drilling and a strong dollar, that never became an economy-wide one. It is the clearest evidence on the page that factories and the economy are not the same thing, and it stays in the table rather than being tuned away.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>The rule you have heard: two negative quarters</h2>
+    <p class="cap">Everyone repeats it and the NBER has never used it. The committee dates cycles on depth, diffusion and duration across several monthly series, and it says so publicly. So here is the folk rule computed on real GDP since 1947 and scored against the committee's own dates, on exactly the terms the episode tables above and on the sibling sites use. The heavy rule is zero.</p>
+    <div class="legend" id="legend-gdp"></div>
+    <div class="plot"><canvas id="c-gdp" height="300"></canvas><div class="tooltip" id="t-gdp"></div></div>
+    <p class="cap" style="margin-top:12px"><span data-tok="two_quarter_rule">…</span></p>
+    <div class="tablewrap"><table id="tq-tbl">
+      <thead><tr><th>Rule fired</th><th>Quarters</th><th>Worst quarter</th><th>Recession peak</th><th>Lag</th><th>Verdict</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="prose" style="margin:10px 0 0">The score: <span data-tok="tq_firings">…</span> firings since <span data-tok="tq_first">…</span>, of which <span data-tok="tq_confirmed">…</span> sat on a real recession and <span data-tok="tq_false">…</span> did not. It led <span data-tok="tq_led">…</span> times out of <span data-tok="tq_firings">…</span>, at a median lag of <span data-tok="tq_median_lag">…</span> quarter. A rule that only ever tells you about a recession you are already in is a description, not a signal.</p>
+    <h2 style="margin-top:20px">And the recessions it never noticed</h2>
+    <p class="cap">The misses matter more than the false alarm, because this rule is used as a definition rather than a forecast. These are recessions the committee dated and the folk rule never fired for at all. The quarters around each peak are printed so you can see exactly how it failed to trigger.</p>
+    <div class="tablewrap"><table id="miss-tbl">
+      <thead><tr><th>Recession the rule missed</th><th>Quarter-over-quarter real GDP around the peak</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="prose" style="margin:10px 0 0">2001 is the case that should end the argument. The negatives were there, in the first and third quarters, but a positive second quarter sat between them, so two never landed in a row and the rule stayed silent through a recession nobody disputes.</p>
+  </section>
+
+  <section class="card">
+    <h2>The 2022 argument, and what the data says now</h2>
+    <p class="cap">In July 2022 the second consecutive negative quarter printed and the country spent a summer arguing about whether a recession had begun. Both sides were reasoning from numbers that no longer exist. Below, the same two quarters as they were published on 29 July 2022 against the same two quarters today, after the revisions.</p>
+    <div id="vint-wrap">
+      <div class="tablewrap"><table id="vint-tbl">
+        <thead><tr><th>Quarter</th><th>As published, 29 Jul 2022</th><th>Today</th><th>Revision</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <p class="prose" style="margin:10px 0 0" id="vint-verdict"></p>
+    </div>
+    <p class="gapnote" id="vint-gap" style="display:none"></p>
+    <p class="prose" style="margin:10px 0 0">This is the only card on the site that needs an API key. Vintage history comes from ALFRED, which is keyed-only; the keyless endpoint serves current data alone. Every other series here refreshes without a key, and if the key is ever removed this card states the gap instead of the page breaking.</p>
+  </section>
+
+  <section class="card">
+    <h2>Capacity, and what output is made of</h2>
+    <p class="cap">Capacity utilization asks a different question from production: not how much is being made, but how much of what could be made is. Manufacturing utilization runs from 1948, nineteen years deeper than the total-industry series, which is why it is the one drawn here. The components beneath it show that treating output as a single thing hides most of the story.</p>
+    <div class="legend" id="legend-cap"></div>
+    <div class="plot"><canvas id="c-cap" height="300"></canvas><div class="tooltip" id="t-cap"></div></div>
+    <div class="legend" id="legend-comp" style="margin-top:18px"></div>
+    <div class="plot"><canvas id="c-comp" height="320"></canvas><div class="tooltip" id="t-comp"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>What the committee actually watches</h2>
+    <p class="cap">The NBER's dating committee names four monthly indicators. Three of them are here, year over year, alongside industrial production: real manufacturing and trade sales, real personal income excluding transfers, and payroll employment. Drawn together rather than scored, because the point is what the committee is looking at, not another table.</p>
+    <div class="legend" id="legend-coin"></div>
+    <div class="plot"><canvas id="c-coin" height="320"></canvas><div class="tooltip" id="t-coin"></div></div>
+    <p class="prose" style="margin:10px 0 0">The unemployment side of the same question has its own page at <a href="https://jobs.chrislawrence.ca">jobs</a>, with the deep US and Canadian history back to the 1920s.</p>
+  </section>
+
+  <section class="card">
+    <h2>Canada: deep quarterly, shallow monthly</h2>
+    <p class="cap">Canada publishes a monthly GDP estimate, which the United States does not, but only from 1997. The quarterly national accounts reach 1961. Both are drawn, on their own axes and never spliced, because a 1961 quarterly series and a 1997 monthly one are different measurements and joining them would invent thirty-six years of monthly detail that was never collected. Shading is the C.D. Howe chronology.</p>
+    <div class="legend" id="legend-ca"></div>
+    <div class="plot"><canvas id="c-ca" height="300"></canvas><div class="tooltip" id="t-ca"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Revisions to published history</h2>
+    <p class="cap" id="rev-cap">Checking…</p>
+    <div class="tablewrap" id="rev-wrap" style="display:none"><table id="rev-tbl">
+      <thead><tr><th>Observed</th><th>Series</th><th>Values changed</th><th>Span</th><th>Largest change</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="prose" style="margin:10px 0 0"><strong>Expect this card to be busy.</strong> Industrial production is benchmarked annually and can move years of history at once. Real GDP is revised three times for every quarter and again each annual update. The card above showing a negative quarter turning positive is not an anomaly, it is this process working normally, and it is the reason every value on this site carries its provenance and every refresh is diffed against the one before it.</p>
+  </section>
+
+  <section class="card">
+    <h2>Sources and construction</h2>
+    <div class="prose" style="margin-top:6px">
+      <h3>United States</h3>
+      <ul>
+        <li><strong>Production</strong>: Federal Reserve G.17 industrial production <a href="https://fred.stlouisfed.org/series/INDPRO">INDPRO</a>, monthly since January 1919, with components for <a href="https://fred.stlouisfed.org/series/IPMAN">manufacturing</a> (1972), <a href="https://fred.stlouisfed.org/series/IPMINE">mining</a> (1919), <a href="https://fred.stlouisfed.org/series/IPUTIL">utilities</a> (1939), <a href="https://fred.stlouisfed.org/series/IPFINAL">final products</a> (1939) and <a href="https://fred.stlouisfed.org/series/IPBUSEQ">business equipment</a> (1947). The downturn table computes from the total.</li>
+        <li><strong>Capacity</strong>: <a href="https://fred.stlouisfed.org/series/CUMFNS">CUMFNS</a> manufacturing utilization from January 1948, preferred to <a href="https://fred.stlouisfed.org/series/TCU">TCU</a> total industry (1967) for nineteen extra years on the same question. Both ship in the payload.</li>
+        <li><strong>Output</strong>: real GDP <a href="https://fred.stlouisfed.org/series/GDPC1">GDPC1</a>, quarterly since 1947-Q1. The two-quarter table scores the quarter-over-quarter change, computed here and deliberately <em>not</em> annualized so the figures in the table are the actual quarterly changes; the sign, which is all the rule depends on, is identical either way.</li>
+        <li><strong>The committee's other indicators</strong>: <a href="https://fred.stlouisfed.org/series/CMRMTSPL">CMRMTSPL</a> real manufacturing and trade sales (1967), <a href="https://fred.stlouisfed.org/series/W875RX1">W875RX1</a> real personal income less transfers (1959), <a href="https://fred.stlouisfed.org/series/PAYEMS">PAYEMS</a> payrolls (1939).</li>
+        <li><strong>Vintages</strong>: the as-published 2022 readings come from ALFRED at vintage 1922-07-29, fetched once and stored, because history as published on a past date does not change. ALFRED is keyed-only.</li>
+        <li><strong>A stated gap</strong>: there is no free purchasing managers' index. FRED's <code>NAPM</code> returns 404; the ISM withdrew redistribution rights. No proxy is substituted for it.</li>
+        <li><strong>Recession bands</strong>: NBER dates via <a href="https://fred.stlouisfed.org/series/USREC">USREC</a>, from the shared dataset. The committee's own description of how it dates cycles is <a href="https://www.nber.org/research/business-cycle-dating">published here</a>, including that it does not use the two-quarter rule.</li>
+      </ul>
+      <h3>Canada</h3>
+      <ul>
+        <li><strong>Quarterly</strong>: GDP at market prices, chained 2017 dollars, SAAR, StatCan table <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610010401">36-10-0104-01</a>, vector v62305752, from 1961-Q1 and live.</li>
+        <li><strong>Monthly</strong>: GDP by industry, table <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401">36-10-0434-01</a>, from January 1997: industrial production (v65201219), all industries (v65201210) and goods-producing industries (v65201211). Manufacturing shipments from table <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1610004701">16-10-0047-01</a>, vector v800450, from 1992 and nominal.</li>
+        <li>Every vector's English title is verified against the live table on each fetch, so a renumbered vector fails loudly instead of returning someone else's numbers.</li>
+        <li><strong>Recession bands</strong>: <a href="https://www.cdhowe.org/wp-content/uploads/2024/12/Commentary_366_0-2.pdf">C.D. Howe Institute Business Cycle Council</a> chronology, from the shared dataset.</li>
+      </ul>
+      <h3>Plumbing</h3>
+      <ul>
+        <li>FRED is fetched keyless-first (public CSV), keyed API as fallback; StatCan WDS has no keys. A failed fetch carries the stored series forward and says so. Only the vintage card requires a key, and it degrades to a stated gap without one.</li>
+        <li>Refreshes daily via cron. Industrial production lands mid-month, GDP three times per quarter, and the Canadian monthly series on StatCan's own calendar. Most runs verify rather than change; the stamp at the top says when the data last moved.</li>
+        <li>Both rules were tuned once against the canonical record at build time and then frozen. They ship inside the payload and are printed above their tables, because a different rule gives a different table and you should be able to see which one produced these.</li>
+        <li>Series follow the shared <code>econ-core</code> contract used across <a href="https://consumer.chrislawrence.ca">consumer</a>, <a href="https://credit.chrislawrence.ca">credit</a>, <a href="https://lending.chrislawrence.ca">lending</a>, <a href="https://housing.chrislawrence.ca">housing</a>, <a href="https://yield.chrislawrence.ca">yield</a>, <a href="https://freight.chrislawrence.ca">freight</a>, <a href="https://jobs.chrislawrence.ca">jobs</a>, <a href="https://debt.chrislawrence.ca">debt</a> and <a href="https://diesel.chrislawrence.ca">diesel</a>.</li>
+        <li>Raw data: <a href="/api/data">/api/data</a>, or the files under <a href="/data/series.json">/data/</a>.</li>
+        <li>Assembled with Claude (Anthropic). Published indices and published aggregates, with computed history and both rules printed; no forecasts.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<footer class="chrislawrence-footer">
+  <a href="https://chrislawrence.ca" class="footer-home-link" aria-label="Back to chrislawrence.ca">
+    <img src="/shared-footer/logo-portrait.png" alt="Chris Lawrence" class="footer-logo"
+         width="32" height="32" loading="lazy" onerror="this.remove()">
+    <span class="footer-home-link-text">Back to chrislawrence.ca</span>
+  </a>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var YEAR = 365.25 * 86400000;
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var state = { p: null, showDownturns: false, logScale: false };
+
+  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function rgba(hex, a) {
+    var n = parseInt(hex.replace("#", ""), 16);
+    return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function ms(iso) { return Date.parse(iso + "T00:00:00Z"); }
+  function pts(entry) { return entry.obs.map(function (o) { return [ms(o[0]), o[1]]; }); }
+  function monthWord(ym) { var q = ym.split("-"); return MONTHS[+q[1] - 1] + " " + q[0]; }
+  function monthEnd(ym) { var q = ym.split("-"); return Date.UTC(+q[0], +q[1], 1) - 86400000; }
+
+  function fmtIdx(v) { return v === null ? "—" : v.toFixed(1); }
+  function fmtPct1(v) { return v === null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "%"; }
+  function fmtPct2(v) { return v === null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2) + "%"; }
+  function fmtPct1v(v) { return v === null ? "—" : v.toFixed(1) + "%"; }
+
+  function niceTicks(lo, hi, target) {
+    var span = hi - lo; if (span <= 0) span = 1;
+    var raw = span / target;
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var norm = raw / mag;
+    var step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+    var ticks = [];
+    for (var k = Math.ceil(lo / step); k * step <= hi + step * 0.001; k++) {
+      ticks.push(Math.round(k * step * 1e6) / 1e6);
+    }
+    return ticks;
+  }
+
+  // ------------------------------------------------------------------
+  // Time-scaled canvas chart: mixed frequencies, shaded bands, dashed
+  // segments, crosshair tooltip. Shared engine, same as the sibling sites.
+  // ------------------------------------------------------------------
+  function TimeChart(canvasId, tooltipId, opts) {
+    this.canvas = document.getElementById(canvasId);
+    this.tip = document.getElementById(tooltipId);
+    this.opts = opts || {};
+    this.hover = null;
+    this.h = parseInt(this.canvas.getAttribute("height"), 10) || 300;
+    var self = this;
+    this.canvas.addEventListener("mousemove", function (e) { self.onMove(e.clientX); });
+    this.canvas.addEventListener("mouseleave", function () { self.clearHover(); });
+    this.canvas.addEventListener("touchmove", function (e) { if (e.touches[0]) self.onMove(e.touches[0].clientX); }, { passive: true });
+    this.canvas.addEventListener("touchend", function () { self.clearHover(); });
+    this.canvas.addEventListener("touchcancel", function () { self.clearHover(); });
+  }
+
+  TimeChart.prototype.clearHover = function () { this.hover = null; this.tip.style.opacity = 0; this.draw(); };
+
+  TimeChart.prototype.setData = function (series, bands) {
+    this.series = series.filter(function (s) { return s.points.length; });
+    this.bands = bands || [];
+    var union = [];
+    this.series.forEach(function (s) {
+      s.medGap = medianGap(s.points);
+      s.points.forEach(function (pt) { union.push(pt[0]); });
+    });
+    union.sort(function (a, b) { return a - b; });
+    this.union = union.filter(function (v, i) { return i === 0 || v !== union[i - 1]; });
+    this.hover = null;
+    this.draw();
+  };
+
+  function medianGap(points) {
+    if (points.length < 2) return YEAR;
+    var gaps = [];
+    for (var i = 1; i < points.length; i++) gaps.push(points[i][0] - points[i - 1][0]);
+    gaps.sort(function (a, b) { return a - b; });
+    return gaps[Math.floor(gaps.length / 2)];
+  }
+
+  function nearest(points, t) {
+    var lo = 0, hi = points.length - 1;
+    while (lo < hi) { var mid = (lo + hi) >> 1; if (points[mid][0] < t) lo = mid + 1; else hi = mid; }
+    if (lo > 0 && Math.abs(points[lo - 1][0] - t) < Math.abs(points[lo][0] - t)) lo -= 1;
+    return lo;
+  }
+
+  TimeChart.prototype.onMove = function (clientX) {
+    if (!this.geom || !this.union || !this.union.length) return;
+    var rect = this.canvas.getBoundingClientRect();
+    var g = this.geom;
+    var t = this.x0 + (clientX - rect.left - g.left) / (g.right - g.left) * (this.x1 - this.x0);
+    var k = nearest(this.union.map(function (v) { return [v, 0]; }), t);
+    var snapped = this.union[Math.max(0, Math.min(this.union.length - 1, k))];
+    if (snapped === this.hover) return;
+    this.hover = snapped;
+    this.draw();
+    this.showTip(snapped, rect);
+  };
+
+  TimeChart.prototype.showTip = function (t, rect) {
+    var monthly = true;
+    this.series.forEach(function (s) { if (s.medGap < 20 * 86400000) monthly = false; });
+    var html = '<div class="tdate">' + new Date(t).toISOString().slice(0, monthly ? 7 : 10) + "</div>";
+    var shown = 0;
+    this.series.forEach(function (s) {
+      var i = nearest(s.points, t);
+      var pt = s.points[i];
+      if (Math.abs(pt[0] - t) > s.medGap * 0.75) return;
+      html += '<div class="trow"><span class="swatch" style="background:' + css(s.color) + '"></span>' +
+              s.name + '<span class="tval">' + (s.fmt || fmtIdx)(pt[1]) + "</span></div>";
+      shown++;
+    });
+    if (!shown) { this.tip.style.opacity = 0; return; }
+    this.tip.innerHTML = html;
+    this.tip.style.opacity = 1;
+    var g = this.geom;
+    var px = g.left + (t - this.x0) / (this.x1 - this.x0) * (g.right - g.left);
+    var w = this.tip.offsetWidth;
+    var left = px + 14;
+    if (left + w > rect.width - 4) left = px - w - 14;
+    if (left < 4) left = 4;
+    this.tip.style.left = left + "px";
+    this.tip.style.top = "14px";
+  };
+
+  TimeChart.prototype.draw = function () {
+    var cv = this.canvas, ctx = cv.getContext("2d");
+    var dpr = window.devicePixelRatio || 1;
+    var w = cv.clientWidth, h = this.h;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    cv.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    if (!this.series || !this.series.length) return;
+
+    var pad = { l: 48, r: 12, t: 10, b: 26 };
+    var g = { left: pad.l, right: w - pad.r, top: pad.t, bottom: h - pad.b };
+    this.geom = g;
+
+    var x0 = Infinity, x1 = -Infinity, lo = Infinity, hi = -Infinity;
+    this.series.forEach(function (s) {
+      s.points.forEach(function (pt) {
+        if (pt[0] < x0) x0 = pt[0];
+        if (pt[0] > x1) x1 = pt[0];
+        if (pt[1] !== null && isFinite(pt[1])) { if (pt[1] < lo) lo = pt[1]; if (pt[1] > hi) hi = pt[1]; }
+      });
+    });
+    if (!isFinite(lo)) return;
+
+    // Log scale is opt-in per chart and declines when the data reaches zero
+    // or below, because log of a non-positive number is not a rendering
+    // problem to paper over. The decision is made on the RAW range, before
+    // padding: linear padding on a century-long index whose floor sits near
+    // 3 pushes that floor negative, which would silently cancel the very
+    // scale that was asked for. In log mode the padding is multiplicative.
+    var useLog = !!this.opts.log && lo > 0;
+    if (useLog) {
+      var lpad = (Math.log10(hi) - Math.log10(lo)) * 0.05 || 0.05;
+      lo = Math.pow(10, Math.log10(lo) - lpad);
+      hi = Math.pow(10, Math.log10(hi) + lpad);
+    } else {
+      var padY = (hi - lo) * 0.08 || 1;
+      lo -= padY; hi += padY;
+      if (this.opts.includeZero && lo > 0) lo = 0;
+      if (this.opts.includeZero && hi < 0) hi = 0;
+    }
+    this.x0 = x0; this.x1 = x1;
+
+    var muted = css("--muted"), grid = css("--grid"), axis = css("--axis");
+    var X = function (t) { return g.left + (t - x0) / Math.max(1, x1 - x0) * (g.right - g.left); };
+    var llo = useLog ? Math.log10(lo) : lo, lhi = useLog ? Math.log10(hi) : hi;
+    var Y = function (v) {
+      var u = useLog ? Math.log10(Math.max(v, 1e-9)) : v;
+      return g.bottom - (u - llo) / (lhi - llo) * (g.bottom - g.top);
+    };
+
+    // bands first, behind everything
+    (this.bands || []).forEach(function (b) {
+      var s = Math.max(x0, b.start), e = Math.min(x1, b.end);
+      if (e <= s) return;
+      ctx.fillStyle = b.fill;
+      ctx.fillRect(X(s), g.top, Math.max(1, X(e) - X(s)), g.bottom - g.top);
+    });
+
+    // y grid
+    ctx.font = "11px system-ui, sans-serif";
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    var yt;
+    if (useLog) {
+      yt = [];
+      for (var dec = Math.floor(llo); dec <= Math.ceil(lhi); dec++) {
+        [1, 2, 5].forEach(function (m) {
+          var v = m * Math.pow(10, dec);
+          if (v >= lo && v <= hi) yt.push(v);
+        });
+      }
+    } else {
+      yt = niceTicks(lo, hi, 6);
+    }
+    var yFmt = this.opts.yFmt || function (v) { return String(Math.round(v * 100) / 100); };
+    yt.forEach(function (v) {
+      var y = Y(v);
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(g.left, Math.round(y) + 0.5); ctx.lineTo(g.right, Math.round(y) + 0.5); ctx.stroke();
+      ctx.fillStyle = muted;
+      ctx.fillText(yFmt(v), g.left - 8, y);
+    });
+
+    // zero line where it matters
+    if (lo < 0 && hi > 0) {
+      ctx.strokeStyle = axis; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(g.left, Math.round(Y(0)) + 0.5); ctx.lineTo(g.right, Math.round(Y(0)) + 0.5); ctx.stroke();
+    }
+
+    // x ticks: years, thinned by span
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    var firstYear = new Date(x0).getUTCFullYear();
+    var lastYear = new Date(x1).getUTCFullYear();
+    var years = lastYear - firstYear;
+    var stepY = years > 60 ? 10 : years > 30 ? 5 : years > 12 ? 2 : 1;
+    for (var yr = Math.ceil(firstYear / stepY) * stepY; yr <= lastYear; yr += stepY) {
+      var t = Date.UTC(yr, 0, 1);
+      if (t < x0 || t > x1) continue;
+      var px = X(t);
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(Math.round(px) + 0.5, g.top); ctx.lineTo(Math.round(px) + 0.5, g.bottom); ctx.stroke();
+      ctx.fillStyle = muted; ctx.fillText(String(yr), px, g.bottom + 6);
+    }
+
+    // axis baseline
+    ctx.strokeStyle = axis; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(g.left, Math.round(g.bottom) + 0.5); ctx.lineTo(g.right, Math.round(g.bottom) + 0.5); ctx.stroke();
+
+    // series
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    var surface = css("--surface-1");
+    this.series.forEach(function (s) {
+      var color = css(s.color);
+      ctx.strokeStyle = color; ctx.lineWidth = s.width || 2;
+      ctx.setLineDash(s.dash ? [5, 4] : []);
+      ctx.beginPath();
+      var pen = false;
+      s.points.forEach(function (pt) {
+        if (pt[1] === null || !isFinite(pt[1])) { pen = false; return; }
+        var xx = X(pt[0]), yy = Y(pt[1]);
+        if (!pen) { ctx.moveTo(xx, yy); pen = true; } else { ctx.lineTo(xx, yy); }
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // crosshair + hover markers
+    if (this.hover !== null) {
+      var hx = X(this.hover);
+      ctx.strokeStyle = axis; ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(Math.round(hx) + 0.5, g.top); ctx.lineTo(Math.round(hx) + 0.5, g.bottom); ctx.stroke();
+      ctx.setLineDash([]);
+      var hoverT = this.hover;
+      this.series.forEach(function (s) {
+        var i = nearest(s.points, hoverT);
+        var pt = s.points[i];
+        if (Math.abs(pt[0] - hoverT) > s.medGap * 0.75 || pt[1] === null) return;
+        ctx.beginPath(); ctx.arc(X(pt[0]), Y(pt[1]), 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = css(s.color); ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = surface; ctx.stroke();
+      });
+    }
+  };
+
+  // ------------------------------------------------------------------
+  // assembly
+  // ------------------------------------------------------------------
+  var charts = {
+    main: new TimeChart("c-main", "t-main", { yFmt: function (v) { return String(Math.round(v)); } }),
+    gdp: new TimeChart("c-gdp", "t-gdp", { includeZero: true, yFmt: function (v) { return v.toFixed(1) + "%"; } }),
+    cap: new TimeChart("c-cap", "t-cap", { yFmt: function (v) { return Math.round(v) + "%"; } }),
+    comp: new TimeChart("c-comp", "t-comp", { yFmt: function (v) { return String(Math.round(v)); } }),
+    coin: new TimeChart("c-coin", "t-coin", { includeZero: true, yFmt: function (v) { return Math.round(v) + "%"; } }),
+    ca: new TimeChart("c-ca", "t-ca", { includeZero: true, yFmt: function (v) { return Math.round(v) + "%"; } })
+  };
+
+  function S(id) {
+    var p = state.p;
+    return (p && p.series && p.series[id]) || null;
+  }
+
+  function bandList(which, fromMs) {
+    var p = state.p, out = [];
+    if (!p || !p.recessions) return out;
+    var defs = [
+      { key: "us", set: p.recessions.us, varName: "--series-1" },
+      { key: "ca", set: p.recessions.ca, varName: "--series-2" }
+    ];
+    var alpha = parseFloat(css("--band-alpha")) || 0.09;
+    defs.forEach(function (d) {
+      if (which.indexOf(d.key) === -1 || !d.set) return;
+      d.set.bands.forEach(function (b) {
+        var start = ms(b.peak + "-01");
+        var end = monthEnd(b.trough);
+        if (end < fromMs) return;
+        out.push({ start: start, end: end, fill: rgba(css(d.varName), alpha) });
+      });
+    });
+    return out;
+  }
+
+  // The computed downturn episodes drawn as bands: the table, on the chart.
+  function downturnBands() {
+    var d = state.p && state.p.analysis && state.p.analysis.downturns;
+    if (!d || !d.episodes) return [];
+    var alpha = (parseFloat(css("--band-alpha")) || 0.09) * 1.5;
+    return d.episodes.map(function (e) {
+      return { start: ms(e.start + "-01"), end: monthEnd(e.end),
+               fill: rgba(css("--series-2"), alpha) };
+    });
+  }
+
+  function legend(elId, items) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = items.map(function (it) {
+      var cls = "swatch" + (it.dash ? " dashed" : "") + (it.band ? " band" : "");
+      var style = it.band
+        ? "background:" + rgba(css(it.color), parseFloat(css("--band-alpha")) * (it.strong ? 3 : 2))
+        : (it.dash ? "border-top-color:" + css(it.color) : "background:" + css(it.color));
+      return '<span class="item"><span class="' + cls + '" style="' + style + '"></span>' + it.name + "</span>";
+    }).join("");
+  }
+
+  function renderMain() {
+    var ip = S("us_ip");
+    if (!ip) return;
+    charts.main.opts.log = state.logScale;
+    var bands = bandList(["us"], pts(ip)[0][0]);
+    if (state.showDownturns) bands = bands.concat(downturnBands());
+    charts.main.setData([
+      { name: "Industrial production", color: "--series-1", points: pts(ip) }
+    ], bands);
+    var items = [{ name: "US industrial production (2017 = 100)" + (state.logScale ? ", log scale" : ""), color: "--series-1" },
+                 { name: "US recessions (NBER)", color: "--series-1", band: true }];
+    if (state.showDownturns) items.push({ name: "Computed downturn episodes", color: "--series-2", band: true, strong: true });
+    legend("legend-main", items);
+  }
+
+  function renderRest() {
+    var qoq = S("us_gdp_qoq");
+    if (qoq) {
+      charts.gdp.setData([
+        { name: "Real GDP, quarter over quarter", color: "--series-1", points: pts(qoq), fmt: fmtPct2 }
+      ], bandList(["us"], pts(qoq)[0][0]));
+      legend("legend-gdp", [
+        { name: "Real GDP, quarter over quarter (not annualized)", color: "--series-1" },
+        { name: "US recessions", color: "--series-1", band: true }
+      ]);
+    }
+
+    var cm = S("us_caputil_mfg"), ct = S("us_caputil_total");
+    if (cm) {
+      charts.cap.setData([
+        { name: "Manufacturing", color: "--series-4", points: pts(cm), fmt: fmtPct1v },
+        ct && { name: "Total industry", color: "--series-3", width: 1.5, dash: true, points: pts(ct), fmt: fmtPct1v }
+      ].filter(Boolean), bandList(["us"], pts(cm)[0][0]));
+      legend("legend-cap", [
+        { name: "Capacity utilization, manufacturing (from 1948)", color: "--series-4" },
+        { name: "Capacity utilization, total industry (from 1967, dashed)", color: "--series-3", dash: true },
+        { name: "US recessions", color: "--series-1", band: true }
+      ]);
+    }
+
+    var man = S("us_ip_manufacturing"), min = S("us_ip_mining"), uti = S("us_ip_utilities");
+    if (man || min || uti) {
+      var from = min ? pts(min)[0][0] : pts(man)[0][0];
+      charts.comp.setData([
+        man && { name: "Manufacturing", color: "--series-1", points: pts(man) },
+        min && { name: "Mining", color: "--series-2", width: 1.5, points: pts(min) },
+        uti && { name: "Utilities", color: "--series-3", width: 1.5, points: pts(uti) }
+      ].filter(Boolean), bandList(["us"], from));
+      legend("legend-comp", [
+        { name: "IP manufacturing", color: "--series-1" },
+        { name: "IP mining", color: "--series-2" },
+        { name: "IP utilities", color: "--series-3" },
+        { name: "US recessions", color: "--series-1", band: true }
+      ]);
+    }
+
+    var ipy = S("us_ip_yoy"), sal = S("us_coincident_sales_yoy"),
+        inc = S("us_coincident_income_yoy"), pay = S("us_payrolls_yoy");
+    if (ipy) {
+      var from2 = sal ? pts(sal)[0][0] : pts(ipy)[0][0];
+      function clip(e) { return pts(e).filter(function (pt) { return pt[0] >= from2; }); }
+      charts.coin.setData([
+        { name: "Industrial production", color: "--series-1", points: clip(ipy), fmt: fmtPct1 },
+        sal && { name: "Real mfg + trade sales", color: "--series-2", width: 1.5, points: clip(sal), fmt: fmtPct1 },
+        inc && { name: "Real income ex transfers", color: "--series-3", width: 1.5, points: clip(inc), fmt: fmtPct1 },
+        pay && { name: "Payrolls", color: "--series-4", width: 1.5, points: clip(pay), fmt: fmtPct1 }
+      ].filter(Boolean), bandList(["us"], from2));
+      legend("legend-coin", [
+        { name: "Industrial production", color: "--series-1" },
+        { name: "Real manufacturing and trade sales", color: "--series-2" },
+        { name: "Real personal income less transfers", color: "--series-3" },
+        { name: "Nonfarm payrolls", color: "--series-4" },
+        { name: "US recessions", color: "--series-1", band: true }
+      ]);
+    }
+
+    var cq = S("ca_gdp_yoy"), ci = S("ca_ip_yoy");
+    if (cq) {
+      charts.ca.setData([
+        { name: "GDP, quarterly (from 1962)", color: "--series-2", points: pts(cq), fmt: fmtPct1 },
+        ci && { name: "Industrial production, monthly (from 1998)", color: "--series-4", width: 1.5, points: pts(ci), fmt: fmtPct1 }
+      ].filter(Boolean), bandList(["ca"], pts(cq)[0][0]));
+      legend("legend-ca", [
+        { name: "Canada real GDP, year over year, quarterly from 1962", color: "--series-2" },
+        { name: "Canada industrial production, year over year, monthly from 1998", color: "--series-4" },
+        { name: "Canadian recessions (C.D. Howe)", color: "--series-2", band: true }
+      ]);
+    }
+  }
+
+  function renderAll() { renderMain(); renderRest(); }
+
+  // ------------------------------------------------------------------
+  // tokens: prose numbers render from data, never from markup
+  // ------------------------------------------------------------------
+  function fillTokens(map) {
+    document.querySelectorAll("[data-tok]").forEach(function (el) {
+      var key = el.getAttribute("data-tok");
+      if (map[key] === undefined) { el.classList.add("tok-missing"); el.textContent = "⟨" + key + "⟩"; }
+      else el.textContent = map[key];
+    });
+  }
+
+  function buildTokens(p) {
+    var map = {};
+    var an = p.analysis || {};
+
+    var d = an.downturns || {};
+    if (d.rule) map.downturn_rule = d.rule.statement;
+    var ds = d.stats || {};
+    if (ds.episodes !== undefined) {
+      map.dt_episodes = String(ds.episodes);
+      map.dt_credited = String(ds.credited_episodes);
+      map.dt_median_crest = String(ds.median_lead_from_crest_months);
+      map.dt_median_alarm_abs = String(Math.abs(ds.median_lead_from_alarm_months));
+      map.dt_uncredited_n = String(ds.uncredited_recessions.length);
+      map.dt_fp_years = ds.false_positive_years.join(" and ") || "none";
+    }
+    var ip = S("us_ip");
+    if (ip) map.dt_years = String(new Date().getUTCFullYear() - parseInt(ip.obs[0][0].slice(0, 4), 10));
+
+    var t = an.two_quarter || {};
+    if (t.rule) map.two_quarter_rule = t.rule.statement;
+    var ts = t.stats || {};
+    if (ts.firings !== undefined) {
+      map.tq_firings = String(ts.firings);
+      map.tq_confirmed = String(ts.confirmed);
+      map.tq_false = String(ts.false_alarms);
+      map.tq_led = String(ts.led);
+      map.tq_median_lag = String(ts.median_lag_quarters);
+      map.tq_first = ts.first_quarter;
+    }
+    return map;
+  }
+
+  function buildChip(p) {
+    var h = ((p.analysis || {}).status || {}).headline;
+    var chip = document.getElementById("chip");
+    if (!h) return;
+    chip.innerHTML = '<span class="dot"></span><span><b>' + h.label + "</b> · " + h.detail + "</span>";
+    chip.setAttribute("data-state", h.state === "signal" ? "signal" : "normal");
+    chip.hidden = false;
+  }
+
+  function buildTiles(p) {
+    var an = p.analysis || {};
+    var st = an.status || {};
+    var t = [];
+    function month(iso) { return monthWord(iso.slice(0, 7)); }
+
+    if (st.us_ip) {
+      t.push({ label: "Industrial production", color: "var(--series-1)",
+               value: st.us_ip.latest[1].toFixed(1),
+               note: month(st.us_ip.latest[0]) + " · 2017 = 100 · " +
+                     (st.us_ip.below_record_pct > 0.05
+                       ? st.us_ip.below_record_pct.toFixed(1) + "% below its record"
+                       : "at its record") });
+    }
+    if (st.us_ip_yoy) {
+      t.push({ label: "Output growth", color: "var(--series-2)",
+               value: fmtPct1(st.us_ip_yoy.latest[1]),
+               note: month(st.us_ip_yoy.latest[0]) + " · year over year" });
+    }
+    if (st.us_caputil_mfg) {
+      t.push({ label: "Capacity used", color: "var(--series-4)",
+               value: st.us_caputil_mfg.latest[1].toFixed(1) + "%",
+               note: month(st.us_caputil_mfg.latest[0]) + " · manufacturing · bottom " +
+                     Math.ceil(st.us_caputil_mfg.percentile) + "% since 1948" });
+    }
+    var ds = (an.downturns || {}).stats;
+    if (ds && ds.episodes) {
+      t.push({ label: "Output confirms", color: "var(--series-3)",
+               value: (ds.median_lead_from_crest_months > 0 ? "+" : "") + ds.median_lead_from_crest_months + " mo",
+               note: ds.episodes + " downturns since 1919 · median lead from crest" });
+    }
+    var ts = (an.two_quarter || {}).stats;
+    if (ts && ts.firings) {
+      t.push({ label: "Two-quarter rule", color: "var(--series-2)",
+               value: ts.led + " of " + ts.firings,
+               note: "firings that led · " + ts.missed + " recessions missed outright" });
+    }
+    document.getElementById("tiles").innerHTML = t.map(function (x) {
+      return '<div class="tile"><div class="label"><span class="swatch" style="background:' + x.color + '"></span>' + x.label +
+             '</div><div class="value">' + x.value + '</div><div class="note">' + x.note + "</div></div>";
+    }).join("");
+  }
+
+  function buildDownturns(p) {
+    var d = p.analysis && p.analysis.downturns;
+    if (!d || !d.episodes) return;
+    var rows = d.episodes.slice().reverse().map(function (e) {
+      var rec, lead;
+      if (e.recessions.length) {
+        rec = e.recessions.map(monthWord).join(" + ");
+        if (e.outcome === "coincident") rec += ' <span class="tag">(alarm trailed)</span>';
+        lead = e.lead_from_crest_months === null ? "—"
+          : (e.lead_from_crest_months > 0 ? "+" : "") + e.lead_from_crest_months + " mo";
+      } else if (e.outcome === "pending") {
+        rec = "<b>none (yet)</b>"; lead = "—";
+      } else {
+        rec = 'none within window <span class="tag">(false alarm)</span>'; lead = "—";
+      }
+      var crest = e.crest
+        ? monthWord(e.crest.month) + " (" + e.crest.value.toFixed(1) + ")"
+        : '<span class="tag">left-censored (index starts here)</span>';
+      var ended = e.still_running ? '<span class="tag">running</span>' : monthWord(e.end);
+      return '<tr' + (e.still_running ? ' class="running"' : '') + "><td>" + crest +
+             "</td><td>" + monthWord(e.start) + " to " + ended +
+             "</td><td>" + e.trough.value.toFixed(1) + " (" + monthWord(e.trough.month) + ")" +
+             "</td><td>−" + e.deepest_below_pct.toFixed(1) + "%" +
+             "</td><td>" + e.months_span +
+             "</td><td>" + rec + "</td><td>" + lead + "</td></tr>";
+    });
+    document.querySelector("#dt-tbl tbody").innerHTML = rows.join("");
+  }
+
+  function buildTwoQuarter(p) {
+    var t = p.analysis && p.analysis.two_quarter;
+    if (!t) return;
+    var rows = (t.firings || []).slice().reverse().map(function (f) {
+      var verdict = f.verdict === "false_alarm"
+        ? '<span class="verdict-bad">false alarm</span>'
+        : "confirmed a recession";
+      var lag = f.lag_quarters === null ? "—"
+        : (f.lag_quarters > 0 ? "+" : "") + f.lag_quarters + "q";
+      return "<tr><td>" + f.start_label + " to " + f.end_label +
+             "</td><td>" + f.quarters +
+             "</td><td>" + fmtPct2(f.worst.value) + " (" + f.worst.quarter + ")" +
+             "</td><td>" + (f.recession_peak ? monthWord(f.recession_peak) : '<span class="tag">none within 4q</span>') +
+             "</td><td>" + lag + "</td><td>" + verdict + "</td></tr>";
+    });
+    document.querySelector("#tq-tbl tbody").innerHTML = rows.join("");
+
+    var misses = (t.misses || []).slice().reverse().map(function (m) {
+      var qs = m.quarters.map(function (q) {
+        var cls = q.value < 0 ? ' style="color:var(--warn);font-weight:600"' : "";
+        return "<span" + cls + ">" + q.quarter + " " + fmtPct2(q.value) + "</span>";
+      }).join(" &nbsp; ");
+      return '<tr class="miss"><td>' + monthWord(m.recession_peak) +
+             ' <span class="tag">recession began</span></td><td style="text-align:left">' + qs + "</td></tr>";
+    });
+    document.querySelector("#miss-tbl tbody").innerHTML = misses.join("");
+  }
+
+  function buildVintages(p) {
+    var v = p.vintages || {};
+    var key = Object.keys(v)[0];
+    var wrap = document.getElementById("vint-wrap");
+    var gap = document.getElementById("vint-gap");
+    var entry = key ? v[key] : null;
+    if (!entry || !entry.available) {
+      wrap.style.display = "none";
+      gap.style.display = "";
+      gap.textContent = "The vintage comparison is unavailable: " +
+        ((entry && entry.reason) || "no vintage data stored") +
+        " Every other series on this page is unaffected, which is the point of keeping this card optional.";
+      return;
+    }
+    var cur = S("us_gdp_qoq");
+    if (!cur) return;
+    var curMap = {};
+    cur.obs.forEach(function (o) { curMap[o[0]] = o[1]; });
+    var rows = entry.obs.filter(function (o) { return o[0] >= "2021-10-01" && o[0] <= "2022-04-01"; });
+    var bothNeg = 0, nowNeg = 0;
+    var html = rows.map(function (o) {
+      var then = o[1], now = curMap[o[0]];
+      if (then < 0) bothNeg++;
+      if (now !== undefined && now < 0) nowNeg++;
+      var q = (function (d) { var y = d.slice(0, 4), m = +d.slice(5, 7); return y + "Q" + ((m - 1) / 3 + 1); })(o[0]);
+      var delta = (now === undefined) ? "—" : fmtPct2(now - then);
+      function cell(x) {
+        if (x === undefined) return "—";
+        return '<span style="color:' + (x < 0 ? "var(--warn)" : "inherit") + '">' + fmtPct2(x) + "</span>";
+      }
+      return "<tr><td>" + q + "</td><td>" + cell(then) + "</td><td>" + cell(now) +
+             "</td><td>" + delta + "</td></tr>";
+    }).join("");
+    document.querySelector("#vint-tbl tbody").innerHTML = html;
+    document.getElementById("vint-verdict").innerHTML =
+      "On the data as published that July, " + bothNeg + " of these quarters were negative and the rule had fired. " +
+      "On today's data " + nowNeg + " " + (nowNeg === 1 ? "is" : "are") + ", so under the same rule it never fired at all. " +
+      "Nobody was wrong about the arithmetic. The arithmetic changed.";
+  }
+
+  function buildRevisions(log) {
+    var cap = document.getElementById("rev-cap");
+    var wrap = document.getElementById("rev-wrap");
+    if (!log || !log.total) {
+      cap.textContent = "No revisions to already-published observations logged yet; the first scheduled refreshes will start filling this in.";
+      return;
+    }
+    cap.textContent = log.total.toLocaleString() + " revision event" + (log.total === 1 ? "" : "s") +
+      " logged" + (log.recent.length < log.total ? " · showing the " + log.recent.length + " most recent" : "") + ".";
+    wrap.style.display = "";
+    document.querySelector("#rev-tbl tbody").innerHTML = log.recent.map(function (r) {
+      return "<tr><td>" + (r.observed_at || "").slice(0, 10) + "</td><td>" + (r.series || "") +
+             "</td><td>" + (r.changed || "") + "</td><td>" + ((r.span || []).join(" to ")) +
+             "</td><td>" + (r.max_delta === undefined ? "—" : r.max_delta) + "</td></tr>";
+    }).join("");
+  }
+
+  // ------------------------------------------------------------------
+  // wiring
+  // ------------------------------------------------------------------
+  document.querySelectorAll("[data-toggle]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var key = b.getAttribute("data-toggle");
+      if (key === "downturns") state.showDownturns = !state.showDownturns;
+      else state.logScale = !state.logScale;
+      b.setAttribute("aria-pressed",
+        (key === "downturns" ? state.showDownturns : state.logScale) ? "true" : "false");
+      renderMain();
+    });
+  });
+
+  var resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { Object.keys(charts).forEach(function (k) { charts[k].draw(); }); }, 120);
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    (mq.addEventListener ? mq.addEventListener.bind(mq, "change") : mq.addListener.bind(mq))(renderAll);
+  }
+
+  fetch("/api/data", { cache: "no-cache" })
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function (p) {
+      state.p = p;
+      document.getElementById("status").style.display = "none";
+
+      var count = 0, obsTotal = 0, key;
+      for (key in p.series) { count++; obsTotal += p.series[key].obs.length; }
+      var ip = S("us_ip");
+      document.getElementById("stamp").textContent =
+        count + " series · " + obsTotal.toLocaleString() + " observations · production through " +
+        (ip ? ip.as_of.slice(0, 7) : "—") + " · refreshed " +
+        (p.series_fetched_at || "").slice(0, 10) + " · built __BUILD_TIME__";
+
+      fillTokens(buildTokens(p));
+      buildChip(p);
+      buildTiles(p);
+      buildDownturns(p);
+      buildTwoQuarter(p);
+      buildVintages(p);
+      buildRevisions(p.changelog);
+      renderAll();
+    })
+    .catch(function (e) {
+      document.getElementById("status").textContent = "Could not load the data (" + e.message + "). The updater may be briefly unavailable; try a reload in a minute.";
+    });
+})();
+</script>
+</body>
+</html>
