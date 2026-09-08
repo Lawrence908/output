@@ -772,12 +772,17 @@ tr.miss td { background: rgba(179,84,30,0.07); }
     return map;
   }
 
+  /* Rendered from analysis.status.headline rather than recomposed here: the
+     server owns the rule and its wording, so the hub and the page cannot
+     drift into saying different things about the same reading. */
   function buildChip(p) {
-    var h = ((p.analysis || {}).status || {}).headline;
+    var head = ((p.analysis || {}).status || {}).headline;
     var chip = document.getElementById("chip");
-    if (!h) return;
-    chip.innerHTML = '<span class="dot"></span><span><b>' + h.label + "</b> · " + h.detail + "</span>";
-    chip.setAttribute("data-state", h.state === "signal" ? "signal" : "normal");
+    if (!head) return;
+    chip.innerHTML = '<span class="dot"></span><span><b>' + head.label + "</b> · " +
+                     head.detail + "</span>";
+    chip.setAttribute("data-state", head.state);
+    chip.title = head.rule;
     chip.hidden = false;
   }
 
