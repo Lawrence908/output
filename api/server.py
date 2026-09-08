@@ -931,7 +931,17 @@ def build_data_payload():
     try:
         doc = _load("series.json")
         payload["series"] = doc.get("series", {})
-        payload["analysis"] = doc.get("analysis", {})
+        # The stored block is written by the refresh, which runs out of
+        # process; one written before the status contract existed has no
+        # headline, and the chip would stay hidden until the next scheduled
+        # run. Recomputing the cheap half here makes a deploy take effect now.
+        # The downturn table is not recomputed, only re-read: it is the
+        # expensive half and the stored copy is what the page is rendering.
+        analysis = dict(doc.get("analysis", {}))
+        if "headline" not in (analysis.get("status") or {}):
+            analysis["status"] = build_status(payload["series"],
+                                              analysis.get("downturns"))
+        payload["analysis"] = analysis
         payload["vintages"] = doc.get("vintages", {})
         payload["series_fetched_at"] = doc.get("fetched_at")
         payload["series_errors"] = doc.get("errors", {})
