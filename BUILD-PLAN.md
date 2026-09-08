@@ -9,7 +9,7 @@ of output downturns, and the two-quarter rule put on trial against the committee
 dates.
 
 Site ten of the family, eighth econ-core consumer. Written 2026-09-07; every series
-probed live from daedalus that day through econcore's fetchers.
+probed live that day through econcore's fetchers.
 
 ## Verified sources
 
