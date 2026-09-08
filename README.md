@@ -106,3 +106,24 @@ quarter plus each annual update. The vintage card above is that process made vis
 
 Assembled with Claude, made by Anthropic. Published indices and published aggregates, with
 computed history and both rules printed. No forecasts.
+
+## Data and attribution
+
+The MIT licence covers this repository's code. It does not cover the data, which is not
+mine: every series belongs to the body that publishes it and carries that body's own terms.
+Each series names its `source` and `source_url` so the original is always one click away.
+
+US series are works of the BEA, BLS, Census Bureau and Federal Reserve (G.17), not
+subject to copyright.
+
+Statistics Canada data is used under the [Open Licence](https://www.statcan.gc.ca/en/reference/licence),
+which requires this acknowledgement: *Adapted from Statistics Canada, the tables and vectors
+named per series above. This does not constitute an endorsement by Statistics Canada of this
+product.*
+
+Recession bands come from econ-core: the US from the NBER chronology via FRED `USREC`,
+Canada from the C.D. Howe Institute Business Cycle Council chronology.
+
+Series reached through FRED are redistributed by the Federal Reserve Bank of St. Louis
+under [its terms of use](https://fred.stlouisfed.org/legal/), which ask that you cite the
+original source and note that it was accessed via FRED.
