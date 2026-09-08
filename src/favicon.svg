@@ -3,6 +3,6 @@
   <rect width="64" height="64" rx="13" fill="#12120f"/>
   <g fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
   <path d="M32 51V17" stroke="#1baf7a"/>
-  <path d="M19 30 32 17l13 13" stroke="#1baf7a" fill="none"/>
+  <path d="M19 30 32 17l13 13" stroke="#1baf7a"/>
   </g>
 </svg>
